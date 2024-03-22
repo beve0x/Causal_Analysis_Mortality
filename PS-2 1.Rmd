@@ -1,0 +1,116 @@
+
+
+
+#Problem-1
+```{r}
+library(haven)
+data<- haven::read_dta('all.dta')
+
+data$cod_any_new<-(data$cod_any*100000)/ (data$pop / 12)
+data$cod_MVA <- (data$cod_MVA*100000)/ (data$pop / 12)
+
+#This difference between both the groups overestimates the effect of MLDA. 
+
+group_1<-data[data$agemo_mda>=-24 & data$agemo_mda<0,]
+
+mean(group_1$cod_any_new)
+
+group_2<-data[data$agemo_mda>0 & data$agemo_mda<=24,]
+
+mean(group_2$cod_any_new)
+```
+#Problem-2
+```{r}
+library(ggplot2)
+# Create a subset of the data for individuals within 2 years of the MLDA
+subset_data <- subset(data, agemo_mda >= -24 & agemo_mda <= 24)
+
+# Create a scatter plot of mortality rates
+scatter_plot <- ggplot(subset_data, aes(x = agemo_mda, y = cod_any_new, color = factor(agemo_mda > 0), shape = factor(agemo_mda > 0))) +
+  geom_point() +
+  xlab("Months from MLDA") +
+  ylab("Mortality Rate") +
+  ggtitle("Mortality Rate by Months from MLDA") +
+  scale_color_discrete(name = "Group", labels = c("Below MLDA", "Above MLDA")) +
+  scale_shape_manual(name = "Group", values = c(15, 19)) +
+  geom_vline(xintercept = 0, linetype = "dashed") 
+
+# Display the scatter plot
+print(scatter_plot)
+```
+
+
+```{r}
+# Create a subset of the data for individuals within 2 years of the MLDA
+subset_data <- subset(data, agemo_mda >= -24 & agemo_mda <= 24)
+
+# Create a scatter plot of mortality rates
+scatter_plot <- ggplot(subset_data, aes(x = agemo_mda, y = cod_MVA, color = factor(agemo_mda > 0), shape = factor(agemo_mda > 0))) +
+  geom_point() +
+  xlab("Months from MLDA") +
+  ylab("Mortality Rate") +
+  ggtitle("Mortality Rate by Months from MLDA") +
+  scale_color_discrete(name = "Group", labels = c("Below MLDA", "Above MLDA")) +
+  scale_shape_manual(name = "Group", values = c(15, 19)) +
+  geom_vline(xintercept = 0, linetype = "dashed") 
+
+# Display the scatter plot
+print(scatter_plot)
+```
+
+
+#Problem-3
+```{r}
+# Load the necessary library
+library(dplyr)
+
+# Filter the data and create the 'treat' column
+donut <- data %>% 
+  filter(agemo_mda != 0) %>% 
+  mutate(treat = if_else(agemo_mda > 0, 1, 0))
+
+# Print the impact of MLDA with a bandwidth of 6
+print("Impact of MLDA with a bandwidth of 6")
+lm(cod_any_new ~ treat, data = subset(donut, abs(agemo_mda) <= 6))
+lm(cod_MVA ~ treat, data = subset(donut, abs(agemo_mda) <= 6))
+
+# Print the impact of MLDA with a bandwidth of 12
+print("Impact of MLDA with a bandwidth of 12")
+lm(cod_any_new ~ treat, data = subset(donut, abs(agemo_mda) <= 12))
+lm(cod_MVA ~ treat, data = subset(donut, abs(agemo_mda) <= 12))
+
+# Print the impact of MLDA with a bandwidth of 24
+print("Impact of MLDA with a bandwidth of 24")
+lm(cod_any_new ~ treat, data = subset(donut, abs(agemo_mda) <= 24))
+lm(cod_MVA ~ treat, data = subset(donut, abs(agemo_mda) <= 24))
+
+# Print the impact of MLDA with a bandwidth of 48
+print("Impact of MLDA with a bandwidth of 48")
+lm(cod_any_new ~ treat, data = subset(donut, abs(agemo_mda) <= 48))
+lm(cod_MVA ~ treat, data = subset(donut, abs(agemo_mda) <= 48))
+
+
+```
+
+
+#Problem-4
+```{r}
+
+#1
+lm(cod_any_new~treat+agemo_mda+agemo_mda*treat,data=subset(donut,abs(agemo_mda) <= 6))
+
+
+lm(cod_MVA~treat+agemo_mda+agemo_mda*treat,data=subset(donut,abs(agemo_mda) <= 6))
+#2
+lm(cod_any_new~treat+agemo_mda+agemo_mda*treat,data=subset(donut,abs(agemo_mda) <= 12))
+lm(cod_MVA~treat+agemo_mda+agemo_mda*treat,data=subset(donut,abs(agemo_mda) <= 12))
+#3
+lm(cod_any_new~treat+agemo_mda+agemo_mda*treat,data=subset(donut,abs(agemo_mda) <= 24))
+lm(cod_MVA~treat+agemo_mda+agemo_mda*treat,data=subset(donut,abs(agemo_mda) <= 24))
+#4
+lm(cod_any_new~treat+agemo_mda+agemo_mda*treat,data=subset(donut,abs(agemo_mda) <= 48))
+lm(cod_MVA~treat+agemo_mda+agemo_mda*treat,data=subset(donut,abs(agemo_mda) <= 48))
+
+```
+
+
